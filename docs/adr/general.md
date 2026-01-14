@@ -14,6 +14,7 @@ This document serves as a central index and summary of all architectural decisio
 ## 🎓 Purpose
 
 The goal of this research project is to compare Node.js ORMs and evaluate real-world trade-offs in:
+
 - **Complexity**: Developer experience, learning curve, and code maintainability
 - **Performance**: Query efficiency, connection pooling, and resource utilization
 - **Maintainability**: Type safety, migration systems, and long-term sustainability
@@ -24,6 +25,7 @@ This ADR document captures key decisions that shape the research methodology, im
 ## 📝 ADR Format
 
 Each architectural decision record follows this structure:
+
 - **Context**: The issue or requirement motivating the decision
 - **Decision**: The change or approach being proposed
 - **Consequences**: The resulting context after applying the decision (both positive and negative)
@@ -45,6 +47,7 @@ When comparing multiple ORMs in a single research project, we need to decide on 
 #### 2️⃣ Decision
 
 We will use a **lightweight monorepo structure** with:
+
 - A root `package.json` for shared tooling and scripts
 - Individual `package.json` files for each ORM implementation
 - Separate directories for each ORM under evaluation
@@ -52,6 +55,7 @@ We will use a **lightweight monorepo structure** with:
 #### 3️⃣ Consequences
 
 ##### Positive ✅
+
 - **Clear architectural boundaries**: Each ORM's implementation is self-contained and easy to locate
 - **Less magic**: No hidden configurations or complex build orchestration—what you see is what you get
 - **Independent versioning**: Each ORM can use its preferred/required versions without conflicts
@@ -59,11 +63,13 @@ We will use a **lightweight monorepo structure** with:
 - **Better reproducibility**: Clear dependency trees per ORM make benchmarks more trustworthy
 
 ##### Negative ⚠️
+
 - **More folders**: Additional directory structure compared to a flat layout
 - **Potential duplication**: Shared utilities or types might need to be duplicated or extracted to a common package
 - **Slightly more setup**: Need to configure workspace in root `package.json`
 
 ##### Neutral 🔄
+
 - Requires understanding of npm/pnpm workspaces (industry-standard knowledge)
 - More `package.json` files to maintain (but each is focused and minimal)
 

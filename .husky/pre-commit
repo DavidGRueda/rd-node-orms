@@ -2,3 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 # Pre-commit checks can be added here later (linting, formatting, etc.)
+pnpm run format:check
