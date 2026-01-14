@@ -33,7 +33,10 @@ Each architectural decision record follows this structure:
 
 ## Decisions
 
-### 📦 ADR-001: Lightweight Monorepo Structure with Per-ORM Package Isolation (2026-01-14)
+- [ADR-001: Lightweight Monorepo Structure with Per-ORM Package Isolation](#adr-001)
+- [ADR-002: Single Service with Route-Based ORM Selection](#adr-002)
+
+### <a id="adr-001"></a>📦 ADR-001: Lightweight Monorepo Structure with Per-ORM Package Isolation (2026-01-14)
 
 #### 1️⃣ Context
 
@@ -79,7 +82,7 @@ We will use a **lightweight monorepo structure** with:
 - Root `package.json` should contain only shared dev tools (TypeScript, testing, linting)
 - Each ORM package should include its own test suite using the same test scenarios
 
-### 🚀 ADR-002: Single Service with Route-Based ORM Selection (2026-01-14)
+### <a id="adr-002"></a>📦 ADR-002: Single Service with Route-Based ORM Selection (2026-01-14)
 
 #### 1️⃣ Context
 
@@ -131,7 +134,5 @@ We will implement a **single Fastify service** that routes requests to different
 - Database connection initialization should happen during plugin registration
 - Include proper error handling and graceful shutdown for all database connections
 - Consider implementing a health check endpoint that verifies all ORMs are operational
-
----
 
 _This document will be updated as architectural decisions are made throughout the project lifecycle._
