@@ -11,8 +11,6 @@
 
 This document serves as a central index and summary of all architectural decisions made during the development of the Node.js ORM R&D project. Each decision is recorded to maintain transparency, facilitate knowledge sharing, and provide context for future development and maintenance.
 
----
-
 ## 🎓 Purpose
 
 The goal of this research project is to compare Node.js ORMs and evaluate real-world trade-offs in:
@@ -23,8 +21,6 @@ The goal of this research project is to compare Node.js ORMs and evaluate real-w
 
 This ADR document captures key decisions that shape the research methodology, implementation approach, and evaluation criteria.
 
----
-
 ## 📝 ADR Format
 
 Each architectural decision record follows this structure:
@@ -32,8 +28,6 @@ Each architectural decision record follows this structure:
 - **Decision**: The change or approach being proposed
 - **Consequences**: The resulting context after applying the decision (both positive and negative)
 - **Implementation Notes**: If they apply.
-
----
 
 ## Decisions
 
