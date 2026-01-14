@@ -1,0 +1,14 @@
+{
+  "name": "rd-node-orms",
+  "version": "1.0.0",
+  "description": "Individual R&D project comparing Node.js ORMs to evaluate real-world trade-offs in complexity, performance, maintainability, and suitability for serverless and traditional architectures. Includes benchmarks, architectural analysis, and reusable technical material.",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d"
+  },
+  "keywords": [],
+  "author": "David Rueda",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.0"
+}
