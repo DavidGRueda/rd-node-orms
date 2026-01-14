@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+  CREATE DATABASE movies_prisma;
+  CREATE DATABASE movies_typeorm;
+  CREATE DATABASE movies_sequelize;
+  CREATE DATABASE movies_drizzle;
+
+  GRANT ALL PRIVILEGES ON DATABASE movies_prisma TO $POSTGRES_USER;
+  GRANT ALL PRIVILEGES ON DATABASE movies_typeorm TO $POSTGRES_USER;
+  GRANT ALL PRIVILEGES ON DATABASE movies_sequelize TO $POSTGRES_USER;
+  GRANT ALL PRIVILEGES ON DATABASE movies_drizzle TO $POSTGRES_USER;
+EOSQL
