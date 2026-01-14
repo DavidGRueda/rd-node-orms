@@ -79,4 +79,59 @@ We will use a **lightweight monorepo structure** with:
 - Root `package.json` should contain only shared dev tools (TypeScript, testing, linting)
 - Each ORM package should include its own test suite using the same test scenarios
 
+### 🚀 ADR-002: Single Service with Route-Based ORM Selection (2026-01-14)
+
+#### 1️⃣ Context
+
+With multiple ORM implementations isolated in separate packages, we need a way to expose and test each ORM's capabilities through a unified interface. The main considerations are:
+
+- Each ORM implementation needs to be accessible for benchmarking and testing
+- We want to maintain a consistent API surface across different ORMs for fair comparison
+- The service should be simple to deploy and run without managing multiple processes
+- Each ORM's configuration should remain isolated in its respective package
+- We need a clear, predictable routing strategy that makes it obvious which ORM is being used
+
+#### 2️⃣ Decision
+
+We will implement a **single Fastify service** that routes requests to different ORM implementations based on URL path prefixes:
+
+- Route structure: `/<orm-name>/<resource>` (e.g., `/prisma/movies`, `/drizzle/users`, `/typeorm/movies`)
+- Each ORM's configuration and setup lives in its respective package under `packages/`
+- The service imports and initializes each ORM package independently
+- The service acts as a thin routing layer, delegating to the appropriate ORM implementation
+
+#### 3️⃣ Consequences
+
+##### Positive ✅
+
+- **Simplified deployment**: Single process to manage instead of multiple services
+- **Consistent benchmarking**: All ORMs run under identical runtime conditions (same Node.js process, same server framework)
+- **Clear separation of concerns**: Service layer handles routing, packages handle ORM-specific logic
+- **Easy comparison**: Switch between ORMs by simply changing the URL path
+- **Reduced infrastructure complexity**: One port, one container, one health check
+- **Natural namespace**: URL structure makes it immediately clear which ORM is handling the request
+
+##### Negative ⚠️
+
+- **Shared memory space**: All ORMs run in the same process, which could affect memory benchmarks
+- **Coupled deployment**: Changes to any ORM require redeploying the entire service
+- **Single point of failure**: If the service crashes, all ORMs become unavailable
+- **Potential resource contention**: Connection pools and other resources share the same process
+
+##### Neutral 🔄
+
+- Requires thoughtful route organization and naming conventions
+- Need to handle initialization and cleanup for multiple database connections
+- Route registration must be maintainable as more ORMs are added
+
+#### 4️⃣ Implementation Notes
+
+- Use Fastify's plugin system to encapsulate each ORM's routes
+- Each ORM package should export a Fastify plugin that registers its routes under a prefix
+- Database connection initialization should happen during plugin registration
+- Include proper error handling and graceful shutdown for all database connections
+- Consider implementing a health check endpoint that verifies all ORMs are operational
+
+---
+
 _This document will be updated as architectural decisions are made throughout the project lifecycle._
