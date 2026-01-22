@@ -100,7 +100,7 @@ With multiple ORM implementations isolated in separate packages, we need a way t
 We will implement **multiple independent Fastify services**, one for each ORM, with the following structure:
 
 - Each ORM package contains a `service/` directory with its own Fastify API
-- Each service runs on its own port (e.g., Prisma on 3001, TypeORM on 3002, Sequelize on 3003, Drizzle on 3004)
+- Each service runs on its own port (e.g., Prisma on 4001, TypeORM on 4002, Sequelize on 4003, Drizzle on 4004)
 - Each package has its own `docker-compose.yaml` that creates a dedicated Postgres database
 - Each package has its own `docker/init/` directory with initialization scripts for its database
 - Services are completely independent and can be started/stopped individually

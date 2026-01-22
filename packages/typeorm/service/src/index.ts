@@ -4,7 +4,7 @@ const fastify = Fastify({
   logger: true,
 });
 
-const port = Number(process.env.SERVICE_PORT) || 3002;
+const port = Number(process.env.SERVICE_PORT_TYPEORM) || 4002;
 
 fastify.get('/', (req, res) => {
   res.send('TypeORM Service');

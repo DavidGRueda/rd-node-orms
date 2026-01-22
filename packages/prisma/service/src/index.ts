@@ -4,7 +4,7 @@ const fastify = Fastify({
   logger: true,
 });
 
-const port = Number(process.env.SERVICE_PORT) || 3001;
+const port = Number(process.env.SERVICE_PORT_PRISMA) || 4001;
 
 fastify.get('/', (req, res) => {
   res.send('Prisma Service');

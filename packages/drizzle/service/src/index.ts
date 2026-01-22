@@ -4,7 +4,7 @@ const fastify = Fastify({
   logger: true,
 });
 
-const port = Number(process.env.SERVICE_PORT) || 3004;
+const port = Number(process.env.SERVICE_PORT_DRIZZLE) || 4004;
 
 fastify.get('/', (req, res) => {
   res.send('Drizzle Service');

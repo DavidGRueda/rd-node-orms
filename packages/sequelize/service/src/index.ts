@@ -4,7 +4,7 @@ const fastify = Fastify({
   logger: true,
 });
 
-const port = Number(process.env.SERVICE_PORT) || 3003;
+const port = Number(process.env.SERVICE_PORT_SEQUELIZE) || 4003;
 
 fastify.get('/', (req, res) => {
   res.send('Sequelize Service');
