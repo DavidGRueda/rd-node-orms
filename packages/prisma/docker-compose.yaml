@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: rd-node-orms-prisma-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - '${POSTGRES_PORT:-5433}:5432'
+    volumes:
+      - rd-node-orms_prisma_postgres_data:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rd-node-orms_prisma_postgres_data:

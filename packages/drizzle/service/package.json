@@ -1,7 +1,7 @@
 {
-  "name": "service",
+  "name": "@rd-node-orms/drizzle-service",
   "version": "1.0.0",
-  "description": "",
+  "description": "Drizzle service",
   "main": "src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
