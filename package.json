@@ -6,6 +6,7 @@
     "db:up:prisma": "node scripts/orm-helper.js db:up prisma",
     "db:down:prisma": "node scripts/orm-helper.js db:down prisma",
     "db:reset:prisma": "node scripts/orm-helper.js db:reset prisma",
+    "db:seed:prisma": "pnpm --filter @rd-node-orms/prisma-service seed",
     "db:up:typeorm": "node scripts/orm-helper.js db:up typeorm",
     "db:down:typeorm": "node scripts/orm-helper.js db:down typeorm",
     "db:reset:typeorm": "node scripts/orm-helper.js db:reset typeorm",

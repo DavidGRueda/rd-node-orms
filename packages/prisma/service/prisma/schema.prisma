@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum MembershipRole {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum MovieStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Organization {
+  id          String       @id @default(uuid())
+  name        String
+  plan        PlanType
+  createdAt   DateTime     @default(now()) @map("created_at")
+  deletedAt   DateTime?    @map("deleted_at")
+  memberships Membership[]
+  movies      Movie[]
+  auditLogs   AuditLog[]
+
+  @@map("organizations")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  status      UserStatus
+  createdAt   DateTime     @default(now()) @map("created_at")
+  deletedAt   DateTime?    @map("deleted_at")
+  memberships Membership[]
+  viewEvents  ViewEvent[]
+  ratings     Rating[]
+  auditLogs   AuditLog[]
+
+  @@map("users")
+}
+
+model Membership {
+  userId         String         @map("user_id")
+  user           User           @relation(fields: [userId], references: [id])
+  organizationId String         @map("organization_id")
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  role           MembershipRole
+  joinedAt       DateTime       @default(now()) @map("joined_at")
+
+  @@id([userId, organizationId])
+  @@map("memberships")
+}
+
+model Movie {
+  id              String       @id @default(uuid())
+  organizationId  String       @map("organization_id")
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  title           String
+  synopsis        String
+  releaseYear     Int          @map("release_year")
+  durationMinutes Int          @map("duration_minutes")
+  rating          Float?       @map("rating")
+  status          MovieStatus
+  createdAt       DateTime     @default(now()) @map("created_at")
+  deletedAt       DateTime?    @map("deleted_at")
+  movieGenres     MovieGenre[]
+  viewEvents      ViewEvent[]
+  ratings         Rating[]
+
+  @@unique([title, organizationId], map: "unique_title_per_organization")
+  @@map("movies")
+}
+
+model Genre {
+  id             String       @id @default(uuid())
+  name           String
+  parentId       String?      @map("parent_id")
+  parent         Genre?       @relation("GenreHierarchy", fields: [parentId], references: [id])
+  childrenGenres Genre[]      @relation("GenreHierarchy")
+  movieGenres    MovieGenre[]
+
+  @@unique([name], map: "unique_name")
+  @@map("genres")
+}
+
+model MovieGenre {
+  movieId String @map("movie_id")
+  movie   Movie  @relation(fields: [movieId], references: [id])
+  genreId String @map("genre_id")
+  genre   Genre  @relation(fields: [genreId], references: [id])
+
+  @@id([movieId, genreId])
+  @@map("movie_genres")
+}
+
+model ViewEvent {
+  id              String   @id @default(uuid())
+  movieId         String   @map("movie_id")
+  movie           Movie    @relation(fields: [movieId], references: [id])
+  userId          String   @map("user_id")
+  user            User     @relation(fields: [userId], references: [id])
+  viewedAt        DateTime @default(now()) @map("viewed_at")
+  durationSeconds Int      @map("duration_seconds")
+
+  @@index([movieId, viewedAt])
+  @@map("view_events")
+}
+
+model Rating {
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  movieId   String   @map("movie_id")
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  score     Int      @map("score")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([userId, movieId])
+  @@map("ratings")
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  actorUserId    String       @map("actor_user_id")
+  actorUser      User         @relation(fields: [actorUserId], references: [id])
+  action         String
+  entityType     String       @map("entity_type")
+  entityId       String       @map("entity_id")
+  payload        Json         @map("payload")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}

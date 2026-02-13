@@ -25,7 +25,9 @@ if (!ORMS.includes(orm) && orm !== 'all') {
   process.exit(1);
 }
 
-const packageDir = path.join(__dirname, '..', 'packages', orm);
+const rootDir = path.join(__dirname, '..');
+const rootEnvPath = path.join(rootDir, '.env');
+const packageDir = path.join(rootDir, 'packages', orm);
 const serviceName = SERVICE_NAMES[orm];
 
 // Handle "all" ORM option
@@ -34,41 +36,57 @@ if (orm === 'all') {
     switch (command) {
       case 'db:up':
         ORMS.forEach((ormName) => {
-          const dir = path.join(__dirname, '..', 'packages', ormName);
-          execSync('docker compose up -d', { cwd: dir, stdio: 'inherit' });
-        });
-        break;
-      case 'db:down':
-        ORMS.forEach((ormName) => {
-          const dir = path.join(__dirname, '..', 'packages', ormName);
-          execSync('docker compose down', { cwd: dir, stdio: 'inherit' });
-        });
-        break;
-      case 'db:reset':
-        ORMS.forEach((ormName) => {
-          const dir = path.join(__dirname, '..', 'packages', ormName);
-          execSync('docker compose down -v && docker compose up -d', {
+          const dir = path.join(rootDir, 'packages', ormName);
+          execSync(`dotenv -e "${rootEnvPath}" -- docker compose up -d`, {
             cwd: dir,
             stdio: 'inherit',
             shell: true,
           });
         });
         break;
+      case 'db:down':
+        ORMS.forEach((ormName) => {
+          const dir = path.join(rootDir, 'packages', ormName);
+          execSync(`dotenv -e "${rootEnvPath}" -- docker compose down`, {
+            cwd: dir,
+            stdio: 'inherit',
+            shell: true,
+          });
+        });
+        break;
+      case 'db:reset':
+        ORMS.forEach((ormName) => {
+          const dir = path.join(rootDir, 'packages', ormName);
+          execSync(
+            `dotenv -e "${rootEnvPath}" -- docker compose down -v && dotenv -e "${rootEnvPath}" -- docker compose up -d`,
+            {
+              cwd: dir,
+              stdio: 'inherit',
+              shell: true,
+            },
+          );
+        });
+        break;
       case 'dev':
         // Start all databases first
         ORMS.forEach((ormName) => {
-          const dir = path.join(__dirname, '..', 'packages', ormName);
-          execSync('docker compose up -d', { cwd: dir, stdio: 'inherit' });
+          const dir = path.join(rootDir, 'packages', ormName);
+          execSync(`dotenv -e "${rootEnvPath}" -- docker compose up -d`, {
+            cwd: dir,
+            stdio: 'inherit',
+            shell: true,
+          });
         });
         // Then start all services in parallel
         const processes = ORMS.map((ormName) => {
           const serviceName = SERVICE_NAMES[ormName];
           const proc = spawn(
             'dotenv',
-            ['-e', '.env', '--', 'pnpm', '--filter', serviceName, 'dev'],
+            ['-e', rootEnvPath, '--', 'pnpm', '--filter', serviceName, 'dev'],
             {
               stdio: 'inherit',
               shell: true,
+              cwd: rootDir,
               env: { ...process.env },
             },
           );
@@ -109,35 +127,53 @@ if (orm === 'all') {
 try {
   switch (command) {
     case 'db:up':
-      execSync('docker compose up -d', { cwd: packageDir, stdio: 'inherit' });
-      break;
-    case 'db:down':
-      execSync('docker compose down', { cwd: packageDir, stdio: 'inherit' });
-      break;
-    case 'db:reset':
-      execSync('docker compose down -v && docker compose up -d', {
+      execSync(`dotenv -e "${rootEnvPath}" -- docker compose up -d`, {
         cwd: packageDir,
         stdio: 'inherit',
         shell: true,
       });
       break;
-    case 'service:dev':
-      execSync(`dotenv -e .env -- pnpm --filter ${serviceName} dev`, {
+    case 'db:down':
+      execSync(`dotenv -e "${rootEnvPath}" -- docker compose down`, {
+        cwd: packageDir,
         stdio: 'inherit',
         shell: true,
+      });
+      break;
+    case 'db:reset':
+      execSync(
+        `dotenv -e "${rootEnvPath}" -- docker compose down -v && dotenv -e "${rootEnvPath}" -- docker compose up -d`,
+        {
+          cwd: packageDir,
+          stdio: 'inherit',
+          shell: true,
+        },
+      );
+      break;
+    case 'service:dev':
+      execSync(`dotenv -e "${rootEnvPath}" -- pnpm --filter ${serviceName} dev`, {
+        stdio: 'inherit',
+        shell: true,
+        cwd: rootDir,
       });
       break;
     case 'service:start':
-      execSync(`dotenv -e .env -- pnpm --filter ${serviceName} start`, {
+      execSync(`dotenv -e "${rootEnvPath}" -- pnpm --filter ${serviceName} start`, {
         stdio: 'inherit',
         shell: true,
+        cwd: rootDir,
       });
       break;
     case 'dev':
-      execSync('docker compose up -d', { cwd: packageDir, stdio: 'inherit' });
-      execSync(`dotenv -e .env -- pnpm --filter ${serviceName} dev`, {
+      execSync(`dotenv -e "${rootEnvPath}" -- docker compose up -d`, {
+        cwd: packageDir,
         stdio: 'inherit',
         shell: true,
+      });
+      execSync(`dotenv -e "${rootEnvPath}" -- pnpm --filter ${serviceName} dev`, {
+        stdio: 'inherit',
+        shell: true,
+        cwd: rootDir,
       });
       break;
     default:
