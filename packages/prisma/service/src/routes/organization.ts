@@ -1,7 +1,3 @@
-/**
- * Organization routes. Request validation is performed in handlers with Zod.
- * The JSON schemas below are for OpenAPI documentation only (no Fastify schema validation).
- */
 import type { FastifyInstance } from 'fastify';
 import * as organizationHandlers from '@/handlers/organization';
 import {

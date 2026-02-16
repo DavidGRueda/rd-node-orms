@@ -30,8 +30,6 @@ export type OrganizationIdParam = z.infer<typeof organizationIdParamSchema>;
 export type CreateOrganizationBody = z.infer<typeof createOrganizationBodySchema>;
 export type UpdateOrganizationBody = z.infer<typeof updateOrganizationBodySchema>;
 
-// JSON Schema for Fastify route definitions (OpenAPI only; not used for runtime validation).
-// $refStrategy: 'none' inlines schemas so Fastify does not need to resolve #/definitions refs.
 const jsonSchemaOptions = { $refStrategy: 'none' as const };
 
 export const organizationIdParamJsonSchema = zodToJsonSchema(

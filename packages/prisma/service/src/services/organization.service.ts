@@ -3,7 +3,7 @@ import type { CreateOrganizationDto, UpdateOrganizationDto } from '@/models';
 
 async function listOrganizations() {
   return prisma.organization.findMany({
-    where: { deletedAt: { not: null } },
+    where: { deletedAt: null },
   });
 }
 
