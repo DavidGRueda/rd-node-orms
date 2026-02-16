@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import * as organizationHandlers from '@/handlers/organization';
+import { organizationHandlers } from '@/handlers/organization';
 import {
   createOrganizationBodyJsonSchema,
   organizationIdParamJsonSchema,
