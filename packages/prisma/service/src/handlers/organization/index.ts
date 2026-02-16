@@ -4,6 +4,7 @@ import {
   createOrganizationBodySchema,
   updateOrganizationBodySchema,
   type OrganizationIdParam,
+  CreateOrganizationBody,
 } from '@/schemas';
 import { organizationService } from '@/services/organization.service';
 import { ERROR_INVALID_ID, ERROR_ORGANIZATION_NOT_FOUND, ERROR_VALIDATION_FAILED } from './errors';
@@ -36,7 +37,10 @@ async function getOrganization(
   return reply.send(organization);
 }
 
-async function createOrganization(request: FastifyRequest<{ Body: unknown }>, reply: FastifyReply) {
+async function createOrganization(
+  request: FastifyRequest<{ Body: CreateOrganizationBody }>,
+  reply: FastifyReply,
+) {
   const parsed = createOrganizationBodySchema.safeParse(request.body);
 
   if (!parsed.success) {
