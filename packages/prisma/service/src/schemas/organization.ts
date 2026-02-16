@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { toJsonSchema } from './schema.utils';
 
 const planTypeEnum = z.enum(['FREE', 'PRO', 'ENTERPRISE']);
 
@@ -30,24 +30,7 @@ export type OrganizationIdParam = z.infer<typeof organizationIdParamSchema>;
 export type CreateOrganizationBody = z.infer<typeof createOrganizationBodySchema>;
 export type UpdateOrganizationBody = z.infer<typeof updateOrganizationBodySchema>;
 
-const jsonSchemaOptions = { $refStrategy: 'none' as const };
-
-export const organizationIdParamJsonSchema = zodToJsonSchema(
-  organizationIdParamSchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
-
-export const createOrganizationBodyJsonSchema = zodToJsonSchema(
-  createOrganizationBodySchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
-
-export const updateOrganizationBodyJsonSchema = zodToJsonSchema(
-  updateOrganizationBodySchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
-
-export const organizationJsonSchema = zodToJsonSchema(
-  organizationResponseSchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
+export const organizationIdParamJsonSchema = toJsonSchema(organizationIdParamSchema);
+export const createOrganizationBodyJsonSchema = toJsonSchema(createOrganizationBodySchema);
+export const updateOrganizationBodyJsonSchema = toJsonSchema(updateOrganizationBodySchema);
+export const organizationJsonSchema = toJsonSchema(organizationResponseSchema);

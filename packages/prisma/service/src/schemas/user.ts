@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { toJsonSchema } from './schema.utils';
 
 const userStatusEnum = z.enum(['ACTIVE', 'INACTIVE', 'PENDING']);
 
@@ -29,24 +29,7 @@ export type UserIdParam = z.infer<typeof userIdParamSchema>;
 export type CreateUserBody = z.infer<typeof createUserBodySchema>;
 export type UpdateUserBody = z.infer<typeof updateUserBodySchema>;
 
-const jsonSchemaOptions = { $refStrategy: 'none' as const };
-
-export const userIdParamJsonSchema = zodToJsonSchema(
-  userIdParamSchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
-
-export const createUserBodyJsonSchema = zodToJsonSchema(
-  createUserBodySchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
-
-export const updateUserBodyJsonSchema = zodToJsonSchema(
-  updateUserBodySchema,
-  jsonSchemaOptions,
-) as Record<string, unknown>;
-
-export const userJsonSchema = zodToJsonSchema(userResponseSchema, jsonSchemaOptions) as Record<
-  string,
-  unknown
->;
+export const userIdParamJsonSchema = toJsonSchema(userIdParamSchema);
+export const createUserBodyJsonSchema = toJsonSchema(createUserBodySchema);
+export const updateUserBodyJsonSchema = toJsonSchema(updateUserBodySchema);
+export const userJsonSchema = toJsonSchema(userResponseSchema);
