@@ -158,7 +158,7 @@ Each ORM service (e.g. Prisma) exposes an API to manage the audiovisual catalog 
 We will use a **layered architecture** for each ORM service API:
 
 - **Routes** — Define HTTP methods and paths; register handlers.
-- **Handlers (controllers)** — Parse and validate the request, call services, format and send the response.
+- **Handlers** — Parse and validate the request (e.g. with Zod), call services, format and send the response.
 - **Services** — Contain business logic and are the only layer that uses the ORM (e.g. Prisma).
 - **Lib** — Shared infrastructure (e.g. ORM client singleton).
 
@@ -189,9 +189,9 @@ flowchart LR
 Simplified sequence:
 
 1. **Route** matches method and path, invokes the **handler**.
-2. **Handler** reads params/query/body, optionally resolves tenant (e.g. `organizationId` from path or header), calls the **service**.
+2. **Handler** reads params/query/body, validates with Zod (or equivalent), optionally resolves tenant (e.g. `organizationId` from path or header), and calls the **service**.
 3. **Service** applies business rules and uses the **ORM** for all reads/writes.
-4. **Service** returns a result (or throws); **handler** maps it to status code and response body.
+4. **Service** returns a result (or throws); **handler** maps it to HTTP status and response body.
 
 #### 4️⃣ Folder Structure
 
@@ -206,30 +206,30 @@ packages/{orm}/service/src/
 │   ├── index.ts          # Aggregates and registers all route modules
 │   ├── organizations.ts  # GET/POST/PATCH/DELETE /organizations
 │   ├── movies.ts         # e.g. /organizations/:orgId/movies
-│   ├── users.ts
 │   └── ...
 ├── handlers/
-│   ├── organizations.ts  # listOrganizations, getOrganization, createOrganization, ...
-│   ├── movies.ts
+│   ├── organizations/
+│   │   ├── index.ts      # Exports organization handlers
+│   │   └── validations.ts # Zod schemas for organization input
+│   ├── movies/
+│   │   ├── index.ts
+│   │   └── validations.ts
 │   └── ...
-├── services/
-│   ├── organization.service.ts  # Business logic + ORM calls only
-│   ├── movie.service.ts
-│   └── ...
-└── middleware/           # Optional: tenant resolution, error handling (no auth in mock)
-    └── tenant.ts         # e.g. set organizationId from path or header
+└── services/
+    ├── organization.service.ts  # Business logic + ORM calls only
+    ├── movie.service.ts
+    └── ...
 ```
 
 **Folder roles:**
 
-| Folder            | Responsibility                                                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`index.ts`**    | Creates the Fastify app, registers plugins and routes, starts the server. No business logic.                                                                 |
-| **`lib/`**        | Shared infrastructure. Typically a single file that instantiates and exports the ORM client (e.g. Prisma) so the rest of the app uses one instance.          |
-| **`routes/`**     | Declares HTTP surface: method, path, and which handler to call. May attach validation (e.g. schema) or middleware. Does not call services or ORM directly.   |
-| **`handlers/`**   | Controllers: receive request/reply, parse and validate input, call one or more services, map results/errors to HTTP status and body. No ORM imports.         |
-| **`services/`**   | Business logic and all database access. Each service file corresponds to a domain area (e.g. organization, movie). Only this layer imports and uses the ORM. |
-| **`middleware/`** | Reusable request/reply logic (e.g. resolving tenant from path/header, global error handler). Optional; no auth in the mock project.                          |
+| Folder          | Responsibility                                                                                                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`index.ts`**  | Creates the Fastify app, registers plugins and routes, starts the server. No business logic.                                                                                           |
+| **`lib/`**      | Shared infrastructure. Typically a single file that instantiates and exports the ORM client (e.g. Prisma) so the rest of the app uses one instance.                                    |
+| **`routes/`**   | Declares HTTP surface: method, path, and which handler to call. May attach validation (e.g. schema). Does not call services or ORM directly.                                           |
+| **`handlers/`** | One subfolder per resource (e.g. `organizations/`). Each contains `index.ts` (handlers) and `validations.ts` (Zod schemas). Handlers validate input and call services; no ORM imports. |
+| **`services/`** | Business logic and all database access. Each service file corresponds to a domain area (e.g. organization, movie). Only this layer imports and uses the ORM.                           |
 
 #### 5️⃣ Consequences
 
@@ -238,25 +238,24 @@ packages/{orm}/service/src/
 - **Clear boundaries**: Routes and handlers stay HTTP-focused; services own domain and data access.
 - **Testability**: Services can be unit tested with a mocked ORM client; handlers can be tested with mocked services.
 - **Single direction**: Dependencies flow inward (routes → handlers → services → ORM), no circular references.
-- **Familiar pattern**: Matches common layered/MVC-style APIs in Node and is easy to document and onboard.
+- **Reusability across ORMs**: Handlers and route structure can be copied to other packages (TypeORM, Sequelize, Drizzle); only the service layer is swapped to use the corresponding ORM.
 
 ##### Negative ⚠️
 
-- **More files per resource**: Adding a new entity usually means a route file, a handler file, and a service file.
+- **More files per resource**: Adding a new entity usually means a route file, a handler subfolder (index + validations), and a service file.
 - **Boilerplate**: Small endpoints still pass through three layers; consistency is traded for a bit of structure.
 
 ##### Neutral 🔄
 
 - Handlers are equivalent to “controllers” in MVC; the name “handlers” is used to align with Fastify/Node conventions.
-- Tenant resolution (e.g. `organizationId`) can live in middleware or inside handlers; both are valid as long as services receive a clear tenant context.
+- Tenant resolution (e.g. `organizationId`) is done inside handlers (e.g. from path or header) so that services receive a clear tenant context.
 
 #### 6️⃣ Implementation Notes
 
 - One route module per resource (e.g. `organizations.ts`, `movies.ts`) that registers paths and delegates to handlers.
-- Handlers accept `(request, reply)` (or equivalent Fastify signatures) and call service methods with plain arguments (ids, DTOs, tenant id).
-- Services receive tenant (e.g. `organizationId`) as an argument and apply it to every query (multi-tenancy).
+- Handlers live in subfolders under `handlers/` (e.g. `handlers/organizations/`) with `index.ts` (exported handlers) and `validations.ts` (Zod schemas). Handlers validate with Zod, call service methods with plain arguments (ids, DTOs), and map results/errors to HTTP status and body.
+- Services expose plain functions (e.g. `listOrganizations()`, `getOrganizationById(id)`, `createOrganization(data)`) so the same handler logic can be reused in other ORM packages by implementing the same service interface.
 - Soft deletes: services filter on `deleted_at: null` for reads and set `deleted_at` on “delete” instead of hard-deleting.
 - No auth layer in the mock project; tenant can be taken from path (e.g. `:organizationId`) or a header (e.g. `X-Organization-Id`) for filtering only.
-- Naming: “handlers” and “controllers” refer to the same layer; the codebase will use one term consistently (e.g. `handlers/`).
 
 _This document will be updated as architectural decisions are made throughout the project lifecycle._

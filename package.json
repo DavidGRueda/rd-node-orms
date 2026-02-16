@@ -41,5 +41,11 @@
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@fastify/swagger": "^9.7.0",
+    "@fastify/swagger-ui": "^5.2.5",
+    "rd-node-orms": "link:",
+    "zod": "^3.24.0"
   }
 }
